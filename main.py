@@ -4,8 +4,12 @@ from flask import Flask, g, request
 import json
 import time
 from TwitterAPI import TwitterAPI
+from twilio.rest import TwilioRestClient
 secret = open("secret").read().strip()
 access_secret = open("access_secret").read().strip()
+twilio_sid = open("twilio_sid").read().strip()
+twilio_token = open("twilio_token").read().strip()
+twilio_from = "+12892361862"
 app = Flask(__name__)
 base_url = "/api/"
 ignore_urls = [base_url, "/static/<path:filename>"]
@@ -16,17 +20,31 @@ sched.start()
 api = TwitterAPI('fmLOenZcTt4YQcgyaiTk6ILne', secret,
         '396757952-pYmsJGekmXKioPFUVOsjQtjpxQZxGc2z012LeFRA', access_secret)
 
+# twilio api
+smsapi = TwilioRestClient(twilio_sid, twilio_token)
+
+
 def wakeup():
     global twitter
+    global twilio
     if (twitter):
         r = api.request('statuses/update', {'status': "Good Morning!"})
+    if (twilio):
+        smsapi.messages.create(body="Good Morning!",
+            to=twilio,
+            from_=twilio_from)
     # Put the code here to wake someone up
     pass
 
 def sleep():
     global twitter
+    global twilio
     if (twitter):
         r = api.request('statuses/update', {'status': "Good night!"})
+    if (twilio):
+        smsapi.messages.create(body="Go to bed!",
+            to=twilio,
+            from_=twilio_from)
     # Put the code here to remind someone to sleep
     return
 
@@ -64,6 +82,7 @@ class Alarm():
 
 alarm = Alarm("%H:%M")
 twitter = False
+twilio = False
 
 @app.route(base_url)
 def list_urls():
@@ -92,6 +111,15 @@ def toggle_twitter():
     else:
         twitter = not twitter
         return json.dumps({"twitter" : twitter})
+
+@app.route(base_url + "twilio", methods=["GET", "POST", "PUT"])
+def toggle_twilio():
+    global twilio
+    if request.method == "GET":
+        return json.dumps({"twilio" : twilio})
+    else:
+        twilio = request.data.decode('utf-8')
+        return json.dumps({"twilio" : twilio})
 
 if __name__ == "__main__":
     app.debug = True
