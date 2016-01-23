@@ -33,6 +33,9 @@ def wakeup():
         smsapi.messages.create(body="Good Morning!",
             to=twilio,
             from_=twilio_from)
+        smsapi.calls.create(to=twilio,
+                from_=twilio_from,
+                url="http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient")
     # Put the code here to wake someone up
     pass
 
@@ -45,6 +48,9 @@ def sleep():
         smsapi.messages.create(body="Go to bed!",
             to=twilio,
             from_=twilio_from)
+        smsapi.calls.create(to=twilio,
+                from_=twilio_from,
+                url="http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient")
     # Put the code here to remind someone to sleep
     return
 
