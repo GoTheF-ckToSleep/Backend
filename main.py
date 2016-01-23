@@ -17,6 +17,9 @@ api = TwitterAPI('fmLOenZcTt4YQcgyaiTk6ILne', secret,
         '396757952-pYmsJGekmXKioPFUVOsjQtjpxQZxGc2z012LeFRA', access_secret)
 
 def wakeup():
+    global twitter
+    if (twitter):
+        r = api.request('statuses/update', {'status': "Good Morning!"})
     # Put the code here to wake someone up
     pass
 
