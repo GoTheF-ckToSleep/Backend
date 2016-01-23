@@ -68,10 +68,10 @@ class Alarm():
             year = today.year,
             month = today.month,
             day = today.day)
-        self.sleep = self.wakeup - timedelta(hours = 8)
+        self.sleep = self.wakeup - timedelta(minutes = 2)
         if self.wakeup < datetime.now():
             self.wakeup += timedelta(hours = 24)
-            self.sleep = self.wakeup + timedelta(hours = 8)
+            self.sleep = self.wakeup + timedelta(minutes = 2)
         if ("sleep" in self.alarms):
             self.alarm_sleep.remove()
         if ("wakeup" in self.alarms):
