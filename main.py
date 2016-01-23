@@ -3,19 +3,28 @@ from datetime import datetime, timedelta, date
 from flask import Flask, g, request
 import json
 import time
+from TwitterAPI import TwitterAPI
+secret = open("secret").read().strip()
+access_secret = open("access_secret").read().strip()
 app = Flask(__name__)
 base_url = "/api/"
 ignore_urls = [base_url, "/static/<path:filename>"]
 sched = Scheduler()
 sched.start()
 
+# twitter api
+api = TwitterAPI('fmLOenZcTt4YQcgyaiTk6ILne', secret,
+        '396757952-pYmsJGekmXKioPFUVOsjQtjpxQZxGc2z012LeFRA', access_secret)
+
 def wakeup():
     # Put the code here to wake someone up
     pass
 
 def sleep():
+    global twitter
+    if (twitter):
+        r = api.request('statuses/update', {'status': "Good night!"})
     # Put the code here to remind someone to sleep
-    print("go to sleep!")
     return
 
 class Alarm():
@@ -52,6 +61,7 @@ class Alarm():
         })
 
 alarm = Alarm("%H:%M")
+twitter = False
 
 @app.route(base_url)
 def list_urls():
@@ -71,6 +81,15 @@ def set_alarm():
     else:
         alarm.set_alarm(request.data)
         return str(alarm)
+
+@app.route(base_url + "twitter", methods=["GET", "POST", "PUT"])
+def toggle_twitter():
+    global twitter
+    if request.method == "GET":
+        return json.dumps({"twitter" : twitter})
+    else:
+        twitter = not twitter
+        return json.dumps({"twitter" : twitter})
 
 if __name__ == "__main__":
     app.debug = True
