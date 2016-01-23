@@ -83,6 +83,7 @@ class Alarm():
 alarm = Alarm("%H:%M")
 twitter = False
 twilio = False
+snooze = False
 
 @app.route(base_url)
 def list_urls():
@@ -103,13 +104,23 @@ def set_alarm():
         alarm.set_alarm(request.data)
         return str(alarm)
 
+@app.route(base_url + "snooze", methods=["POST"])
+def set_snooze():
+    global snooze
+    if (snooze):
+        snooze.remove()
+    now = datetime.now()
+    snooze_time = now + timedelta(minutes = 10)
+    snooze = sched.add_date_job(wakeup, snooze_time, [])
+    return snooze_time.strftime("%H:%M")
+
 @app.route(base_url + "twitter", methods=["GET", "POST", "PUT"])
 def toggle_twitter():
     global twitter
     if request.method == "GET":
         return json.dumps({"twitter" : twitter})
     else:
-        twitter = not twitter
+        twitter = request.data.decode('utf-8')
         return json.dumps({"twitter" : twitter})
 
 @app.route(base_url + "twilio", methods=["GET", "POST", "PUT"])
