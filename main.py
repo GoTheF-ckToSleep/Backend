@@ -46,18 +46,17 @@ class Alarm():
             self.wakeup += timedelta(hours = 24)
             self.sleep = self.wakeup + timedelta(hours = 8)
         if ("sleep" in self.alarms):
-            self.alarms.sleep.remove()
+            self.alarm_sleep.remove()
         if ("wakeup" in self.alarms):
-            self.alarms.wakeup.remove()
-        self.alarms = {
-            "sleep" : sched.add_date_job(sleep, self.sleep, []),
-            "wakeup" : sched.add_date_job(wakeup, self.wakeup, []),
-        }
+            self.alarm_wakeup.remove()
+        if self.sleep > datetime.now():
+            self.alarm_sleep = sched.add_date_job(sleep, self.sleep, [])
+        self.alarm_wakeup = sched.add_date_job(wakeup, self.wakeup, [])
 
     def __str__(self):
         return json.dumps({
-            "wakeup" : self.sleep.strftime(self.time_format),
-            "sleep" : self.wakeup.strftime(self.time_format),
+            "sleep" : self.sleep.strftime(self.time_format),
+            "wakeup" : self.wakeup.strftime(self.time_format),
         })
 
 alarm = Alarm("%H:%M")
