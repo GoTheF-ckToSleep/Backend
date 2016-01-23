@@ -1,6 +1,6 @@
+from datetime import datetime, timedelta
 from flask import Flask, g, request
 import json
-from time import strptime, strftime
 app = Flask(__name__)
 base_url = "/api/"
 ignore_urls = [base_url, "/static/<path:filename>"]
@@ -12,10 +12,14 @@ class Alarm():
 
     def set_alarm(self, time):
         strtime = time.decode("utf-8")
-        self.time = strptime(strtime, self.time_format)
+        self.time = datetime.strptime(strtime, self.time_format)
+        self.wakeup = self.time - timedelta(hours = 8)
 
     def __str__(self):
-        return strftime(self.time_format, self.time)
+        return json.dumps({
+            "wakeup" : self.time.strftime(self.time_format),
+            "sleep" : self.wakeup.strftime(self.time_format),
+        })
 
 alarm = Alarm("%H:%M")
 
@@ -32,10 +36,10 @@ def toggle_switch():
 @app.route(base_url + "alarm", methods=["GET", "POST", "PUT"])
 def set_alarm():
     if request.method == "GET":
-        return alarm.time
+        return str(alarm)
     else:
         alarm.set_alarm(request.data)
-        return "Alarm set for %s" % alarm
+        return str(alarm)
 
 if __name__ == "__main__":
     app.debug = True
